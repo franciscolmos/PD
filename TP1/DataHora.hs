@@ -17,7 +17,11 @@ data Hora = Hora { hora :: Int , minuto :: Int }
 
 -- Redefinimos el Show para el tipo de datos Hora
 instance Show Hora where
-  show (Hora h m) = show h ++ ":" ++ show m 
+  show (Hora h m) 
+                | h < 10 && m < 10 = "0" ++ show h ++ ":0" ++ show m
+                | h < 10 && m >= 10 = "0" ++ show h ++ ":" ++ show m
+                | h >= 10 && m < 10 = show h ++ ":0" ++  show m
+                | otherwise = show h ++ ":" ++ show m
 
 
 -- Getter de hora y minuto
@@ -48,9 +52,3 @@ normalizar x = Hora (tomarHora x) (tomarMinuto x)
 
 diferenciaHoraria :: Hora -> Hora -> Int
 diferenciaHoraria h1 h2 = abs (desnormalizar h1 - desnormalizar h2)
-
-
-
-
-
-
