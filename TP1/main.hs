@@ -19,10 +19,7 @@ main = do
         horarios = map (tomarTuplas . drop 1) tuplas
 
         horasSumadas = map (map sumarHoras) horarios
-
-        -- Para los puntos 3, 4 y 5
         horasAcumuladas = map acumularHoras horasSumadas
-
         horasNormalizadas = map normalizar horasAcumuladas
         stringHoras = map show horasNormalizadas
 
