@@ -45,21 +45,20 @@ main = do
         -- Formatemaos el resultado de los registros de cada empleado.
         stringRegistrosEmpleados = map mostrarResultado resultado
 
+        -- Obtenemos la cantidad de empleados
+        intCantidadEmpleados = length $ filter buscarCantEmpleados lineas
+        stringCantidadEmpleados = ["Total de empleados listados: " ++ show intCantidadEmpleados] 
+
         -- Calculamos la cantidad de horas acumuladas.
         floatHorasAcumuladas = fromIntegral (sum horasAcumuladas) / 60
         stringHorasAcumuladas =  ["\nCantidad de horas acumuladas en el mes: " ++ show floatHorasAcumuladas ++ " hs"]
-
-        -- Obtenemos la cantidad de empleados
-        cantidadEmpleados = filter buscarCantEmpleados lineas
-        intCantidadEmpleados = read $ filter (`elem` "0123456789") (unwords cantidadEmpleados) :: Int
-        stringCantidadEmpleados = ["\n" ++ filter (`notElem` "\"\"") (unwords cantidadEmpleados)] 
 
         -- Calculamos la cantidad de horas trabajadas por hombre mensualmente
         floatHorasHombre =  floatHorasAcumuladas / fromIntegral intCantidadEmpleados
         stringHorasHombre = ["\nCantidad de horas/hombre en el mes: " ++ show floatHorasHombre ++ " hs"]
 
         -- Calculamos la el promedio diario de horas/hombre
-        intAvgHorasHombre = floatHorasHombre / 30
+        intAvgHorasHombre = floatHorasHombre / 20
         stringAvgHorasHombre = ["\nPromedio diario de horas/hombre: " ++ show intAvgHorasHombre ++ " hs"]
         
         -- concatenamos los strings para mostrar el resultado final
@@ -76,8 +75,9 @@ filtrarRenglones str | str == "\r" = False
 
 {- Obtiene el registro que tiene la cantidad de empleados -}
 buscarCantEmpleados :: String -> Bool
-buscarCantEmpleados str | str == "\r" = False
-                        | otherwise = (!! 0) (words str) == "\"Total"
+buscarCantEmpleados str
+                    | str == "\r" = False
+                    | otherwise = (!! 0) (words str) == "\"Empleado:\""
        
 {- Genera tuplas a partir de cada registro -}
 hacerTuplas :: [String] -> [(String, String)]
