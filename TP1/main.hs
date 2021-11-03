@@ -4,50 +4,67 @@ import Data.List (isPrefixOf, zip4)
 import DataHora
 
 main = do
+    -- Leemos el archivo 09septiembre2019.txt y lo guardamos en la variable lineas
     archivo <- openFile "09septiembre2019.txt" ReadMode
     contenido  <- hGetContents archivo
     let lineas = lines contenido
 
+        -- Filramos solo los registros que tengan informacion de los dias trabajados.
         registros = filter filtrarRenglones lineas
 
-        registrosIncompletos = map words registros
-        matrizIngresosEgresos = map (map (filter (`notElem` "\"\""))) registrosIncompletos
+        -- Generamos una matriz donde cada fila es un registro de dia trabajado.
+        matrizHorarios = map words registros
 
+        -- Quitamos los caracteres sobrantes para una mejor lectura.
+        matrizHorariosFiltrada = map (map (filter (`notElem` "\"\""))) matrizHorarios
+
+        -- Generamos las tuplas por cada registro de dia trabajado.
+        tuplas = map hacerTuplas matrizHorariosFiltrada
+
+        -- Separamos los dias - fecha de los horarios.
+        diaFecha = map (unirStrings . take 1) tuplas
+
+        -- Genaramos los datos de tipo Hora a partir de las tuplas de horario.
+        horarios = map (tomarTuplas . drop 1) tuplas
+
+        -- Calculamos la cantidad de minutos trabajados por par ingreso,salida.
+        horasSumadas = map (map sumarHoras) horarios
+
+        -- Sumamos los minutos trabajados por empleado por dia.
+        horasAcumuladas = map sum horasSumadas
+
+        -- Convertimos los minutos en Horas
+        horasNormalizadas = map normalizar horasAcumuladas
+
+        -- convertimos en String las Horas.
+        stringHoras = map show horasNormalizadas
+
+        -- Unimos los dias con sus horas trabajadas respectivamente.
+        resultado = zip diaFecha stringHoras
+
+        -- Formatemaos el resultado de los registros de cada empleado.
+        stringRegistrosEmpleados = map mostrarResultado resultado
+
+        -- Calculamos la cantidad de horas acumuladas.
+        floatHorasAcumuladas = fromIntegral (sum horasAcumuladas) / 60
+        stringHorasAcumuladas =  ["\nCantidad de horas acumuladas en el mes: " ++ show floatHorasAcumuladas ++ " hs"]
+
+        -- Obtenemos la cantidad de empleados
         cantidadEmpleados = filter buscarCantEmpleados lineas
-
         intCantidadEmpleados = read $ filter (`elem` "0123456789") (unwords cantidadEmpleados) :: Int
         stringCantidadEmpleados = ["\n" ++ filter (`notElem` "\"\"") (unwords cantidadEmpleados)] 
 
-
-        tuplas = map hacerTuplas matrizIngresosEgresos
-
-        diaFecha = map (unirStrings . take 1) tuplas
-        horarios = map (tomarTuplas . drop 1) tuplas
-
-        horasSumadas = map (map sumarHoras) horarios
-        horasAcumuladas = map acumularHoras horasSumadas
-        horasNormalizadas = map normalizar horasAcumuladas
-        stringHoras = map show horasNormalizadas
-
-        floatHorasAcumuladas = fromIntegral (sum horasAcumuladas) / 60
-
-        stringHorasAcumuladas =  ["\nCantidad de horas acumuladas en el mes: " ++ show floatHorasAcumuladas ++ " hs"]
-
-        resultado = zip diaFecha stringHoras
-
-        stringRegistrosEmpleados = map mostrarResultado resultado
-
+        -- Calculamos la cantidad de horas trabajadas por hombre mensualmente
         floatHorasHombre =  floatHorasAcumuladas / fromIntegral intCantidadEmpleados
-        stringHorasHombre = ["\nCantidad de horas/hombre en el mes: " ++ show stringHorasHombre ++ " hs"]
+        stringHorasHombre = ["\nCantidad de horas/hombre en el mes: " ++ show floatHorasHombre ++ " hs"]
 
-        stringAvgHorasHombre = ["\nPromedio diario de horas/hombre: " ++ show (floatHorasHombre / 30) ++ " hs"]
-        --intAvgHorasHombre = floatHorasHombre / 30
-
+        -- Calculamos la el promedio diario de horas/hombre
+        intAvgHorasHombre = floatHorasHombre / 30
+        stringAvgHorasHombre = ["\nPromedio diario de horas/hombre: " ++ show intAvgHorasHombre ++ " hs"]
+        
+        -- concatenamos los strings para mostrar el resultado final
         informe = stringRegistrosEmpleados ++ stringCantidadEmpleados ++ stringHorasAcumuladas ++ stringHorasHombre ++ stringAvgHorasHombre
 
-
-
-    --print intAvgHorasHombre
     putStrLn $ unlines informe
     hClose archivo
 
@@ -57,11 +74,12 @@ filtrarRenglones :: String -> Bool
 filtrarRenglones str | str == "\r" = False
                      | otherwise = (!! 0) (words str) `elem` ["\"Lunes\"", "\"Martes\"", "\"Miercoles\"", "\"Jueves\"", "\"Viernes\""]
 
+{- Obtiene el registro que tiene la cantidad de empleados -}
 buscarCantEmpleados :: String -> Bool
 buscarCantEmpleados str | str == "\r" = False
                         | otherwise = (!! 0) (words str) == "\"Total"
        
-
+{- Genera tuplas a partir de cada registro -}
 hacerTuplas :: [String] -> [(String, String)]
 hacerTuplas [] = []
 hacerTuplas str = ((!!0) str, (!!1) str) : hacerTuplas (tail (tail str))
@@ -76,6 +94,7 @@ tomarMinutoString :: String -> Int
 tomarMinutoString "" = -1
 tomarMinutoString n = read (drop 3 n) :: Int
 
+{- Permite construir una tupla de Hora -}
 crearHoras :: (String,String) -> (Hora,Hora)
 crearHoras (x,y) = (Hora (tomarHoraString x) (tomarMinutoString x), Hora (tomarHoraString y) (tomarMinutoString y))
 
@@ -85,21 +104,17 @@ sumarHoras (x,y)
             | hora x == -1 || hora y == -1 = 0
             | otherwise = diferenciaHoraria x y
 
-{- tomarTuplas -}
+{- Convierte una lista de tuplas de String a una lista de tuplas de Hora -}
 tomarTuplas :: [(String,String)] -> [(Hora,Hora)]
 tomarTuplas = map crearHoras
 
-acumularHoras :: [Int] -> Int
-acumularHoras [] = 0
-acumularHoras x = head x + acumularHoras (tail x)
-
+{- Unimos los dias con su fecha -}
 unirStrings :: [(String,String)] -> String
 unirStrings [] = ""
 unirStrings ((_, _):_:_) = ""
 unirStrings [(x,y)] | x == "Miercoles" = x ++ "\t" ++ y
                     | otherwise = x ++ "\t\t" ++ y
 
+{- Formatea el resultado para una mejor visualizacion -}
 mostrarResultado :: (String,String) -> String
 mostrarResultado (x,y) = x ++ "\t" ++ y
-
--- , "\"Total"
