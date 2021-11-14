@@ -47,7 +47,7 @@ main = do
 
         -- Obtenemos la cantidad de empleados
         intCantidadEmpleados = length $ filter buscarCantEmpleados lineas
-        stringCantidadEmpleados = ["Total de empleados listados: " ++ show intCantidadEmpleados] 
+        stringCantidadEmpleados = ["\nTotal de empleados listados: " ++ show intCantidadEmpleados] 
 
         -- Calculamos la cantidad de horas acumuladas.
         floatHorasAcumuladas = fromIntegral (sum horasAcumuladas) / 60
