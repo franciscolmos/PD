@@ -1,83 +1,75 @@
 (defrule hermanos
-    (padre-de ?papa ?hijo)
-    (madre-de ?mama ?hijo)
+    (padre-de ?hijo ?papa)
+    (madre-de ?hijo ?mama)
     (hombre ?hijo)
-    (padre-de ?papa ?hija)
-    (madre-de ?mama ?hija)
+    (padre-de ?hija ?papa)
+    (madre-de ?hija ?mama)
     (mujer ?hija)
 =>
-    (assert (Hermano ?hijo ?hija))
-    (assert (Hermana ?hija ?hijo))
+    (assert (Hermano-de ?hija ?hijo))
+    (assert (Hermana-de ?hijo ?hija))
 )
 
 (defrule abuelo-paterno
-    (padre-de ?papa ?nieto)
-    (padre-de ?abuelo ?papa)
+    (padre-de ?nieto ?papa)
+    (padre-de ?papa ?abuelo)
     (hombre ?abuelo)
 =>    
-    (assert (Abuelo ?abuelo ?nieto))
+    (assert (Abuelo-de ?nieto ?abuelo))
 )
 
 (defrule abuelo-materno
-    (madre-de ?mama ?nieto)
-    (padre-de ?abuelo ?mama)
+    (madre-de ?nieto ?mama)
+    (padre-de ?mama ?abuelo)
     (hombre ?abuelo)
 =>    
-    (assert (Abuelo ?abuelo ?nieto))
+    (assert (Abuelo-de ?nieto ?abuelo))
 )
 
 (defrule abuela-paterna
-    (padre-de ?papa ?nieto)
-    (madre-de ?abuela ?papa)
+    (padre-de ?nieto ?papa)
+    (madre-de ?papa ?abuela)
     (mujer ?abuela)
 =>    
-    (assert (Abuela ?abuela ?nieto))
+    (assert (Abuela-de ?nieto ?abuela))
 )
 
 (defrule abuela-materna
-    (madre-de ?mama ?nieto)
-    (madre-de ?abuela ?mama)
+    (madre-de ?nieto ?mama)
+    (madre-de ?mama ?abuela)
     (mujer ?abuela)
 =>    
-    (assert (Abuela ?abuela ?nieto))
+    (assert (Abuela-de ?nieto ?abuela))
 )
 
 (defrule abuelos
-    (mujer-de ?abuela ?abuelo)
-    (esposo-de ?abuelo ?abuela)
-    (Abuelo ?abuelo ?nieto)
-    (Abuela ?abuela ?nieto)
+    (mujer-de ?abuelo ?abuela)
+    (esposo-de ?abuela ?abuelo)
+    (Abuelo-de ?nieto ?abuelo)
+    (Abuela-de ?nieto ?abuela)
 =>
-    (assert (Abuelos ?abuelo ?abuela ?nieto))
+    (assert (Abuelos-de ?nieto ?abuelo ?abuela))
 )
 
 (defrule Primo
-    (Hermano ?padre ?madre)
-    (Hermana ?madre ?padre)
-    (padre-de ?padre ?hijo)
-    (madre-de ?madre ?hije)
-    (hombre ?hijo)
-    (hombre ?hije)
+    (Hermano-de ?madre ?padre)
+    (padre-de ?hijo ?padre)
+    (madre-de ?hije ?madre)
 =>
-    (assert (Primo ?hijo ?hije))
+    (assert (Primo-de ?hijo ?hije))
+    (assert (Primo-de ?hije ?hijo))
 )
 
 (defrule Tio
-    (padre-de ?padre1 ?hijo1)
-    (Primo ?hijo1 ?hijo2)
-    (padre-de ?padre2 ?hijo2)
-    (Primo ?hijo1 ?hijo2)
+    (padre-de ?hijo ?padre)
+    (Primo-de ?hijo ?primo)
 =>
-    (assert (tio-de ?hijo2 ?padre1))
-    (assert (tio-de ?hijo1 ?padre2))
+    (assert (Tio-de ?primo ?padre))
 )
 
 (defrule Tia
-    (madre-de ?madre1 ?hijo1)
-    (Primo ?hijo1 ?hijo2)
-    (madre-de ?madre2 ?hijo2)
-    (Primo ?hijo1 ?hijo2)
+    (madre-de ?hijo ?madre)
+    (Primo-de ?hijo ?primo)
 =>
-    (assert (tia-de ?hijo2 ?madre1))
-    (assert (tia-de ?hijo1 ?madre2))
+    (assert (Tia-de ?primo ?madre))
 )
